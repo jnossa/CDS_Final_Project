@@ -1,0 +1,27 @@
+The error "invalid command 'bdist_wheel'" suggests that the `wheel` package is not installed or not installed correctly. The `bdist_wheel` command is part of the `wheel` package, which is used for building wheel distributions.
+
+You can install the `wheel` package using `pip`. Open a terminal or command prompt in your project's root directory and run:
+
+```bash
+pip install wheel
+```
+
+After installing the `wheel` package, try running the `python setup.py sdist bdist_wheel` command again.
+
+Here's the sequence of commands being on the directory, for this case C:\Users\jaoss\Desktop\Data_Science\1st Term\Computing for Data Science\Libraries
+
+```bash
+# Install wheel package
+--> pip install wheel
+
+# Build distribution packages
+--> python setup.py sdist bdist_wheel
+```
+
+After this, you can proceed with installing your library using:
+
+```bash
+--> pip install .
+```
+
+If you encounter any other issues, feel free to provide more details about the error messages, and I'll do my best to assist you.
