@@ -10,9 +10,13 @@ fplibrary/clean_imput/__init__.py
 fplibrary/clean_imput/impute_missing_knn.py
 fplibrary/clean_imput/map_feature.py
 fplibrary/clean_imput/one_hot_encode_feature.py
+fplibrary/evaluation/__init__.py
+fplibrary/evaluation/find_best_regression_model.py
 fplibrary/exploration/__init__.py
 fplibrary/exploration/create_boxplots.py
 fplibrary/exploration/create_histograms.py
 fplibrary/exploration/create_scatter_plots.py
 fplibrary/exploration/missing_values_summary.py
 fplibrary/exploration/visualize_data_relationship.py
+fplibrary/preparation/__init__.py
+fplibrary/preparation/standardize_features.py
