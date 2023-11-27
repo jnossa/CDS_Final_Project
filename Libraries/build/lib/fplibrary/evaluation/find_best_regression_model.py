@@ -1,5 +1,4 @@
 from sklearn.linear_model import LinearRegression, Lasso, Ridge
-from sklearn.model_selection import cross_val_score
 import numpy as np
 import pandas as pd
 import matplotlib.pyplot as plt

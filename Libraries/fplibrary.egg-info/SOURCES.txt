@@ -11,6 +11,7 @@ fplibrary/clean_imput/impute_missing_knn.py
 fplibrary/clean_imput/map_feature.py
 fplibrary/clean_imput/one_hot_encode_feature.py
 fplibrary/evaluation/__init__.py
+fplibrary/evaluation/cross_validation.py
 fplibrary/evaluation/find_best_regression_model.py
 fplibrary/exploration/__init__.py
 fplibrary/exploration/create_boxplots.py
