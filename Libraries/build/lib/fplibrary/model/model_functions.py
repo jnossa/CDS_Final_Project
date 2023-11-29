@@ -1,8 +1,11 @@
 import matplotlib.pyplot as plt
 import pandas as pd
 import numpy as np
-from sklearn.linear_model import LinearRegression, Lasso, Ridge
-from sklearn.ensemble import RandomForestClassifier
+from sklearn.linear_model import LinearRegression, Lasso, Ridge, LogisticRegression
+from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
+from sklearn.tree import DecisionTreeClassifier
+import lightgbm as lgb
+from xgboost import XGBClassifier
 from sklearn.metrics import roc_auc_score, mean_squared_error
 from sklearn.model_selection import train_test_split, cross_val_score, KFold
 
