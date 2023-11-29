@@ -10,6 +10,7 @@ class Feature(ABC):
     @abstractmethod
     def transform(self):
         raise NotImplementedError
+    
 
 class Standardizer(Feature):
     """
@@ -55,38 +56,29 @@ class Normalizer(Feature):
             self.data[i] = normalized_column
         return self.data
     
-class Encoding(Feature):
+class Date:
     """
-        Map values of a feature in a dataset based on a given mapping dictionary.
+    A class for handling date-related operations in a dataset.
 
-       ************************
-       *******FILL IN**********
-       ************************
+    Methods:
+    - split_date(df, column_to_split)
+        Split a date column into new features (day of week, month, year).
+
+    Attributes:
+    - None
     """
-    def __init__(self, data):
-        self.data = data
+    def __init__(self) -> None:
+        pass
+    def split_date(self, df, coluumn_to_split):
+        # Convert the 'date' column to datetime format
+        df[coluumn_to_split] = pd.to_datetime(df[coluumn_to_split])
 
-    def map_feature(self, feature, mapping_dict):
-        mapped_data = self.data.copy()
+        # Create new features based on date
+        df['day_of_week'] = df[coluumn_to_split].dt.dayofweek
+        df['month'] = df[coluumn_to_split].dt.month
+        df['year'] = df[coluumn_to_split].dt.year
 
-        mapped_data[feature] = mapped_data[feature].map(mapping_dict)
-
-        return mapped_data
-
-    def one_hot_encode_feature(self, feature):
-        encoded_data = self.data.copy()
-
-        # Perform one-hot encoding using pandas get_dummies function
-        encoded_feature = pd.get_dummies(encoded_data[feature], prefix=feature, drop_first=True)
-        encoded_feature = encoded_feature.applymap(lambda x: 1 if x > 0 else 0)
-
-        # Concatenate the one-hot encoded feature with the original dataset
-        encoded_data = pd.concat([encoded_data, encoded_feature], axis=1)
-
-        # Drop the original feature as it's no longer needed in its original form
-        encoded_data.drop(feature, axis=1, inplace=True)
-
-        return encoded_data
+        return df
 
 
 
