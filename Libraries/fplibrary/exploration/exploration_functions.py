@@ -94,12 +94,14 @@ class MissingValues:
     Attributes:
     - None
     """
-    def __init__(self) -> None:
-        pass
+    def __init__(self, data):
+        self.data = data
 
-    def missing_values_summary(df:pd.DataFrame):
-        missing_data = df.isnull().sum()
-        percentage_missing = (missing_data / len(df)) * 100
+    def missing_values_summary(self):
+        if isinstance(self.data, pd.DataFrame):
+            raise ValueError("Data attribute must be a Pandas DataFrame.")
+        missing_data = self.data.isnull().sum()
+        percentage_missing = (missing_data / len(self.data)) * 100
 
         # Create a summary DataFrame
         summary_df = pd.DataFrame({'Missing Values': missing_data, 'Percentage Missing': percentage_missing})
@@ -120,13 +122,10 @@ class Correlation:
     Attributes:
     - None
     """
-    def __init__(self) -> None:
-        pass
+    def __init__(self, data):
+        self.data = data
     
     def visualize_data_correlation(self, features: list):
-        # Pairplot
-        sns.pairplot(self.data[features])
-        plt.show()
 
         # Correlation matrix heatmap
         corr_matrix = self.data[features].corr()
