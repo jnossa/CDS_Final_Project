@@ -8,11 +8,15 @@ class ExplorationPlots:
     def __init__(self, data):
         self.data = data
 
-    def create_boxplot(self, y_feature, x_features: str or list, color: str = 'coolwarm', n_rows: int = 1, n_cols: int = None):
+    def create_boxplot(self, y_feature, x_features: str or list, color: str = 'coolwarm', n_rows: int = 1,
+                       n_cols: int = None):
         if n_cols is None:
             n_cols = len(x_features)
 
         fig, axes = plt.subplots(n_rows, n_cols, figsize=(15, 5 * n_rows))
+
+        # Convert axes to an array
+        axes = np.array([axes])
 
         for x_feature, ax in zip(x_features, axes.flatten()):
             sns.boxplot(x=self.data[x_feature], y=self.data[y_feature], palette=color, ax=ax)
@@ -34,7 +38,7 @@ class ExplorationPlots:
         fig, axes = plt.subplots(n_rows, n_cols, figsize=(15, 5 * n_rows))
 
         if n_rows == 1 and n_cols == 1:
-            axes = [axes]
+            axes = np.array([axes])
 
         for feature, ax in zip(features, axes.flatten()):
             if len(feature) != 2:
@@ -58,6 +62,9 @@ class ExplorationPlots:
             n_cols = len(features)
 
         fig, axes = plt.subplots(n_rows, n_cols, figsize=(15, 5 * n_rows))
+
+        # Convert axes to an array
+        axes = np.array([axes])
 
         for feature, bin_count, ax in zip(features, bins, axes.flatten()):
             # Handle NaN values by dropping them
@@ -98,8 +105,6 @@ class MissingValues:
         self.data = data
 
     def missing_values_summary(self):
-        if isinstance(self.data, pd.DataFrame):
-            raise ValueError("Data attribute must be a Pandas DataFrame.")
         missing_data = self.data.isnull().sum()
         percentage_missing = (missing_data / len(self.data)) * 100
 
@@ -110,6 +115,7 @@ class MissingValues:
         summary_df = summary_df[summary_df['Missing Values']>0].sort_values(by='Missing Values', ascending=False)
 
         return summary_df
+
 
 class Correlation:
     """
