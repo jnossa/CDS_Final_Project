@@ -28,10 +28,14 @@ class MissingValues:
     """
     def __init__(self, data):
         self.data = data
+        
+    def remove_col(self, cols: list):
+      self.data = self.data.drop(cols, axis=1)
+      return self.data
 
     def remove_nan(self, cols: list):
-        data = self.data.dropna(subset=cols)
-        return data
+        self.data = self.data.dropna(subset=cols)
+        return self.data
 
     def fill_nan(self, cols):
         for col in cols:
@@ -89,8 +93,9 @@ class Outliers:
         plt.title('Representation of the data:')
 
     def detect_outliers_iqr(self):
+        numeric_data = self.data.select_dtypes(include='number').columns
         # Calculate quartiles 25% and 75%
-        q25, q75 = np.quantile(self.data, 0.25), np.quantile(self.data, 0.75)
+        q25, q75 = np.quantile(numeric_data, 0.25), np.quantile(numeric_data, 0.75)
 
         # calculate the IQR
         iqr = q75 - q25
