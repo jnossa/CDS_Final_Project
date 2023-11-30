@@ -29,6 +29,8 @@ class Standardizer(Feature):
     def transform(self, cols):
         for i in cols:
             self.data[i] = (self.data[i] - np.mean(self.data[i])) / np.std(self.data[i])
+        
+        return self.data
 
 class Normalizer(Feature):
     """
@@ -80,7 +82,54 @@ class Date:
 
         return df
 
+class Encoding:
+    """
+    A class for encoding features in a dataset.
 
+    Parameters:
+    - data: pandas DataFrame
+      The dataset to be encoded.
+
+    Methods:
+    - mapping(feature, mapping_dict):
+      Map values of a feature in the dataset based on a given mapping dictionary.
+
+    - one_hot_encoding(feature):
+      Perform one-hot encoding on a categorical feature in the dataset.
+
+    - label_encoding(feature):
+      Perform label encoding on a categorical feature in the dataset.
+
+    - target_encoding(feature, target):
+      Perform target encoding on a categorical feature in the dataset based on the target variable.
+    """
+    def __init__(self, data):
+        self.data = data
+
+    def mapping(self, features: list, mapping_dict):
+        for feature in features:
+            self.data[feature] = self.data[feature].map(mapping_dict)
+
+        return self.data
+
+    def one_hot_encoding(self, feature):
+        encoded_feature = pd.get_dummies(self.data[feature], prefix=feature, drop_first=True)
+        encoded_feature = encoded_feature.applymap(lambda x: 1 if x > 0 else 0)
+        self.data = pd.concat([self.data, encoded_feature], axis=1)
+        self.data.drop(feature, axis=1, inplace=True)
+
+        return self.data
+    
+    def label_encoding(self, feature):
+        self.data[feature] = pd.factorize(self.data[feature])[0]
+
+        return self.data
+
+    def target_encoding(self, feature, target):
+        encoding_map = self.data.groupby(feature)[target].mean().to_dict()
+        self.data[feature] = self.data[feature].map(encoding_map)
+
+        return self.data
 
 
 
