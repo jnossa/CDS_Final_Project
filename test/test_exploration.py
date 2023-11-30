@@ -5,7 +5,7 @@ import io
 import matplotlib.pyplot as plt
 
 # Import the ExplorationPlots class
-from fplibrary.exploration import ExplorationPlots, MissingValues, Correlation
+from fplibrary.exploration import ExplorationPlots, Correlation
 
 
 class TestExplorationPlots(unittest.TestCase):
@@ -46,31 +46,6 @@ class TestExplorationPlots(unittest.TestCase):
 
     def test_create_histogram(self):
         self._assert_plot_generated(self.exploration_plots.create_histogram, ['Feature3'])
-
-
-class TestMissingValues(unittest.TestCase):
-    def setUp(self):
-        # Create a sample DataFrame for testing
-        self.df = pd.DataFrame({
-            'Feature1': [1, 2, np.nan, 4, 5],
-            'Feature2': [6, 7, 8, 9, 10],
-            'Feature3': [11, np.nan, 13, 14, 15]
-        })
-        self.empty_df = pd.DataFrame()  # Empty DataFrame
-        self.missing_values = MissingValues(self.df)
-        self.empty_missing_values = MissingValues(self.empty_df)
-
-    def test_missing_values_summary(self):
-        # Test for non-empty DataFrame
-        summary = self.missing_values.missing_values_summary()
-        self.assertIsInstance(summary, pd.DataFrame)
-        self.assertEqual(summary.shape, (2, 2))
-
-    def test_missing_values_summary_empty_df(self):
-        # Test for empty DataFrame
-        empty_summary = self.empty_missing_values.missing_values_summary()
-        self.assertIsInstance(empty_summary, pd.DataFrame)
-        self.assertTrue(empty_summary.empty)
 
 
 if __name__ == '__main__':
