@@ -90,33 +90,6 @@ class ExplorationPlots:
         plt.show()
 
 
-class MissingValues:
-    """
-    A class for showing missing values in a dataset.
-
-    Methods:
-    - missing_values_summary(df)
-      Calculate the total missing values and percentage for each column.
-
-    Attributes:
-    - None
-    """
-    def __init__(self, data):
-        self.data = data
-
-    def missing_values_summary(self):
-        missing_data = self.data.isnull().sum()
-        percentage_missing = (missing_data / len(self.data)) * 100
-
-        # Create a summary DataFrame
-        summary_df = pd.DataFrame({'Missing Values': missing_data, 'Percentage Missing': percentage_missing})
-
-        # Sort the summary DataFrame by the number of missing values in descending order
-        summary_df = summary_df[summary_df['Missing Values']>0].sort_values(by='Missing Values', ascending=False)
-
-        return summary_df
-
-
 class Correlation:
     """
     A class for visualizing data correlation in a dataset.
