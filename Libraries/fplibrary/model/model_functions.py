@@ -4,8 +4,6 @@ import numpy as np
 from sklearn.linear_model import LinearRegression, Lasso, Ridge, LogisticRegression
 from sklearn.ensemble import RandomForestClassifier, GradientBoostingClassifier
 from sklearn.tree import DecisionTreeClassifier
-import lightgbm as lgb
-from xgboost import XGBClassifier
 from sklearn.metrics import roc_auc_score, mean_squared_error
 from sklearn.model_selection import train_test_split, cross_val_score, KFold
 
@@ -19,7 +17,7 @@ class Model:
         model: Machine learning model for training and prediction.
 
     Methods:
-        __init__(self, features, target, hyperparameters=None)
+        __init__(self, features, target, model, hyperparameters=None)
             Initializes the Model class with the specified parameters.
 
         train(self, df_train)
@@ -42,7 +40,7 @@ class Model:
     def predict(self, data):
         X_test = data[self._features]
 
-        return self.model.predict_proba(X_test)[:, 1]
+        return self.model.predict(X_test)
     
     def accuracy(self, data, pred_col):
 
