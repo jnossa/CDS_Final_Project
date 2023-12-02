@@ -137,6 +137,10 @@ class Encoding:
 # It uses the latitude and longitude info but rounded up so there are not so many consultation, otherwise the API shuts down
 # It gets data about min and max temp, precipitation per day and max wind speed
 # With that I get all the outputs, if you think there is something not relevant just take it out
+# You need to install these
+# pip install openmeteo-requests
+# pip install requests-cache retry-requests numpy pandas
+
 def obtain_weather(data: pd.DataFrame, start_date: str='2022-11-29', end_date: str='2023-11-28'):
     """
     Obtain weather data from OpenMeteo for a given date range and integrate it into a DataFrame.
