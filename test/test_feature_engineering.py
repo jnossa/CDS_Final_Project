@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 
 # Import the Standardizer, Normalizer, Date, Encoding classes
-from fplibrary.feature_engineering import Standardizer, Normalizer, Date, Encoding
+from fplibrary.feature_engineering import Standardizer, Normalizer, Date, Encoding, WeatherFeatures
 
 
 class TestStandardizer(unittest.TestCase):
@@ -126,6 +126,46 @@ class TestEncoding(unittest.TestCase):
         # Check if target encoding is performed correctly
         expected_values = [1.0, 0.0, 1.0, 0.5, 0.0, 0.5]
         self.assertTrue(all(self.encoding_instance.data['Category'] == expected_values))
+
+
+class TestWeatherFeatures(unittest.TestCase):
+
+    def setUp(self):
+        # Create a sample DataFrame for testing
+        self.sample_data = pd.DataFrame({
+            'latitude': [52.0, 53.0, 52.5],
+            'longitude': [13.0, 14.0, 13.5]
+            # Add other relevant columns needed for your tests
+        })
+
+        # Create an instance of WeatherFeatures
+        self.weather_features = WeatherFeatures(self.sample_data)
+
+    def test_obtain_weather_columns_created(self):
+        # Call the method to be tested
+        result_data = self.weather_features.obtain_weather()
+
+        # Add assertions to check if new columns are created
+        self.assertIn('max_temp', result_data.columns)
+        self.assertIn('min_temp', result_data.columns)
+        self.assertIn('avg_temp', result_data.columns)
+        self.assertIn('max_precip', result_data.columns)
+        self.assertIn('total_precip', result_data.columns)
+        self.assertIn('rainy_days', result_data.columns)
+        self.assertIn('max_wind', result_data.columns)
+
+    def test_obtain_weather_columns_not_null(self):
+        # Call the method to be tested
+        result_data = self.weather_features.obtain_weather()
+
+        # Assertions to check if values in new columns are not null
+        self.assertTrue(result_data['max_temp'].notnull().all())
+        self.assertTrue(result_data['min_temp'].notnull().all())
+        self.assertTrue(result_data['avg_temp'].notnull().all())
+        self.assertTrue(result_data['max_precip'].notnull().all())
+        self.assertTrue(result_data['total_precip'].notnull().all())
+        self.assertTrue(result_data['rainy_days'].notnull().all())
+        self.assertTrue(result_data['max_wind'].notnull().all())
 
 
 if __name__ == '__main__':
