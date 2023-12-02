@@ -3,3 +3,4 @@
 .ipynb_checkpoints/
 *.egg-info/
 *__pycache__/
+.cache.sqlite
