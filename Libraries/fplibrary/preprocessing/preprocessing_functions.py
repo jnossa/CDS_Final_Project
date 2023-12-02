@@ -38,11 +38,11 @@ class MissingValues:
         self.data = self.data.drop(cols, axis=1)
         return self.data
 
-    def remove_nan(self, cols: list):
+    def remove_rows_with_nan(self, cols: list):
         self.data = self.data.dropna(subset=cols)
         return self.data
 
-    def fill_nan(self, cols):
+    def fill_nan_with_mean(self, cols):
         for col in cols:
             self.data[col].fillna(self.data[col].mean(), inplace=True)
         return self.data
