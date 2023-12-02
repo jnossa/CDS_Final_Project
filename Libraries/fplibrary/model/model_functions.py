@@ -42,9 +42,9 @@ class Model:
 
         return self.model.predict(X_test)
     
-    def accuracy(self, data, pred_col):
+    def accuracy(self, data, pred):
 
-        return roc_auc_score(data[self._target], data[pred_col])
+        return mean_squared_error(data[self._target], pred)
 
 class CrossValidation:
     """
@@ -60,26 +60,89 @@ class CrossValidation:
     Attributes:
     - None
     """
-    def __init__(self) -> None:
-        pass
+    def __init__(self, features, target, model, hyperparameters=None):
+        self._features = features
+        self._target = target
+        self.model = model(**hyperparameters) if hyperparameters else model
+        
     # Performing 5-fold cross-validation
-    def regression_accuracy(X, y, model):
+    def regression_accuracy(self, data):
         kf = KFold(n_splits=5, shuffle=True, random_state=42)
-        cv_results = cross_val_score(model, X, y, cv=kf, scoring='neg_mean_squared_error')
+        cv_results = cross_val_score(self.model, data[self._features], data[self._target], cv=kf, scoring='neg_mean_squared_error')
 
         # Printing the cross-validation results
         print("Cross-validation results:")
         print(cv_results*(-1))
         print(f"Mean squared error: {(cv_results.mean())*-1:.2f} +/- {cv_results.std():.2f}")
     
-    def classification_accuracy(X, y, model):
+    def classification_accuracy(self, data):
         kf = KFold(n_splits=10, shuffle=True, random_state=42)
-        cv_results = cross_val_score(model, X, y, cv=kf)
+        cv_results = cross_val_score(self.model, data[self._features], data[self._target], cv=kf)
 
         # Printing the cross-validation results
         print("Cross-validation results:")
         print(cv_results)
         print(f"Accuracy: {cv_results.mean()} +/- {cv_results.std():.3f}")
+        
+
+class HyperparameterTuning:
+    
+    def __init__(self, features, target):
+        self._features = features
+        self._target = target
+        
+
+    def find_best_alpha(self, data):
+        """
+        Find the best alpha and minimum MSE for Lasso and Ridge regression.
+
+        Parameters:
+        - data: data to run the hyperparameter tuning with.
+
+        Returns:
+        - best_alpha_lasso: float, best alpha for Lasso.
+        - min_mse_lasso: float, minimum MSE for Lasso.
+        - best_alpha_ridge: float, best alpha for Ridge.
+        - min_mse_ridge: float, minimum MSE for Ridge.
+        """
+        # Split the data into training and testing sets
+        X_train, X_test, y_train, y_test = train_test_split(data[self._features], data[self._target], test_size=0.2, random_state=28)
+
+        # Define a range of alpha values to try
+        alphas = np.logspace(-10, 0, 50)
+
+        # Initialize variables to store the best alpha and minimum MSE
+        best_alpha_lasso = None
+        best_alpha_ridge = None
+        min_mse_lasso = float('inf')
+        min_mse_ridge = float('inf')
+
+        # Loop over the alpha values and fit Lasso and Ridge models
+        for alpha in alphas:
+            # Fit Lasso model
+            lasso = Lasso(alpha=alpha)
+            lasso.fit(X_train, y_train)
+            y_pred_lasso = lasso.predict(X_test)
+            mse_lasso = mean_squared_error(y_test, y_pred_lasso)
+
+            # Update best alpha and minimum MSE for Lasso
+            if mse_lasso < min_mse_lasso:
+                min_mse_lasso = mse_lasso
+                best_alpha_lasso = alpha
+
+            # Fit Ridge model
+            ridge = Ridge(alpha=alpha)
+            ridge.fit(X_train, y_train)
+            y_pred_ridge = ridge.predict(X_test)
+            mse_ridge = mean_squared_error(y_test, y_pred_ridge)
+
+            # Update best alpha and minimum MSE for Ridge
+            if mse_ridge < min_mse_ridge:
+                min_mse_ridge = mse_ridge
+                best_alpha_ridge = alpha
+
+        return best_alpha_lasso, min_mse_lasso, best_alpha_ridge, min_mse_ridge
+        
 
 
 class RegressionEvaluation:
