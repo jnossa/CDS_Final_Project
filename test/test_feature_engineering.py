@@ -58,7 +58,7 @@ class TestDate(unittest.TestCase):
         # Create a sample DataFrame with a date column for testing
         data = {'date_column': ['2023-01-01', '2023-02-15', '2023-03-30']}
         self.df = pd.DataFrame(data)
-        self.date_instance = Date()
+        self.date_instance = Date(self.df)
 
     def test_split_date(self):
         # Specify the column to split
@@ -68,7 +68,7 @@ class TestDate(unittest.TestCase):
         self.df[column_to_split] = pd.to_datetime(self.df[column_to_split])
 
         # Perform the split_date operation
-        self.date_instance.split_date(self.df, column_to_split)
+        self.date_instance.transform(column_to_split)
 
         # Check if new features 'day_of_week', 'month', and 'year' are created
         self.assertTrue('day_of_week' in self.df.columns)
