@@ -114,6 +114,16 @@ class Encoding:
             self.data[feature] = self.data[feature].map(mapping_dict)
 
         return self.data
+    
+    def return_closest_key(self, col: str, mapping_dict):
+        
+        def find_closest_key(value):
+            return min(mapping_dict, key=lambda x: abs(mapping_dict[x] - value))
+    
+        self.data[col] = self.data[col].apply(find_closest_key)
+        
+        return self.data
+        
 
     def one_hot_encoding(self, feature):
         encoded_feature = pd.get_dummies(self.data[feature], prefix=feature, drop_first=True)
