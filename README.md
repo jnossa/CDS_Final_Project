@@ -15,7 +15,7 @@ The library is designed to handle tasks such as loading data, preprocessing, fea
 
 ## Dataset
 
-The dataset used in this project contains apartment offers from the 15 largest cities in Poland (Warsaw, Lodz, Krakow, Wroclaw, Poznan, Gdansk, Szczecin, Bydgoszcz, Lublin, Katowice, Bialystok, Czestochowa). The data is sourced from local websites with apartments for sale and is supplemented with data from Open Street Map, providing distances to points of interest (POI). The dataset covers the timespan between August 2023 and November 2023. You can find the dataset [here](link-to-dataset).
+The dataset used in this project contains apartment offers from the 15 largest cities in Poland (Warsaw, Lodz, Krakow, Wroclaw, Poznan, Gdansk, Szczecin, Bydgoszcz, Lublin, Katowice, Bialystok, Czestochowa). The data is sourced from local websites with apartments for sale and is supplemented with data from Open Street Map, providing distances to points of interest (POI). The dataset covers the timespan between August 2023 and November 2023. You can find the dataset [here](https://www.kaggle.com/datasets/krzysztofjamroz/apartment-prices-in-poland).
 
 ## Repository Structure
 
