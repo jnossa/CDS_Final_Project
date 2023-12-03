@@ -106,7 +106,7 @@ class HyperparameterTuning:
         - min_mse_ridge: float, minimum MSE for Ridge.
         """
         # Split the data into training and testing sets
-        X_train, X_test, y_train, y_test = train_test_split(data[self._features], data[self._target], test_size=0.2, random_state=28)
+        X, X_test, y, y_test = train_test_split(data[self._features], data[self._target], test_size=0.2, random_state=28)
 
         # Define a range of alpha values to try
         alphas = np.logspace(-10, 0, 50)
@@ -121,7 +121,7 @@ class HyperparameterTuning:
         for alpha in alphas:
             # Fit Lasso model
             lasso = Lasso(alpha=alpha)
-            lasso.fit(X_train, y_train)
+            lasso.fit(X, y)
             y_pred_lasso = lasso.predict(X_test)
             mse_lasso = mean_squared_error(y_test, y_pred_lasso)
 
@@ -132,7 +132,7 @@ class HyperparameterTuning:
 
             # Fit Ridge model
             ridge = Ridge(alpha=alpha)
-            ridge.fit(X_train, y_train)
+            ridge.fit(X, y)
             y_pred_ridge = ridge.predict(X_test)
             mse_ridge = mean_squared_error(y_test, y_pred_ridge)
 
@@ -164,7 +164,7 @@ class RegressionEvaluation:
         - min_mse_ridge: float, minimum MSE for Ridge.
         """
         # Split the data into training and testing sets
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=28)
+        X, X_test, y, y_test = train_test_split(X, y, test_size=0.2, random_state=28)
 
         # Define a range of alpha values to try
         alphas = np.logspace(-10, 0, 50)
@@ -179,7 +179,7 @@ class RegressionEvaluation:
         for alpha in alphas:
             # Fit Lasso model
             lasso = Lasso(alpha=alpha)
-            lasso.fit(X_train, y_train)
+            lasso.fit(X, y)
             y_pred_lasso = lasso.predict(X_test)
             mse_lasso = mean_squared_error(y_test, y_pred_lasso)
 
@@ -190,7 +190,7 @@ class RegressionEvaluation:
 
             # Fit Ridge model
             ridge = Ridge(alpha=alpha)
-            ridge.fit(X_train, y_train)
+            ridge.fit(X, y)
             y_pred_ridge = ridge.predict(X_test)
             mse_ridge = mean_squared_error(y_test, y_pred_ridge)
 
@@ -200,7 +200,7 @@ class RegressionEvaluation:
                 best_alpha_ridge = alpha
 
         return best_alpha_lasso, min_mse_lasso, best_alpha_ridge, min_mse_ridge
-    
+        
     def find_best_regression_model(self, X: pd.DataFrame, y: pd.DataFrame):
         """
         Perform linear regression, Lasso regression, and Ridge regression with cross-validated alpha selection.
@@ -215,23 +215,23 @@ class RegressionEvaluation:
         - formula: str, the regression formula for the best model.
         """
         # Split the data into training and testing sets
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=28)
+        X, X_test, y, y_test = train_test_split(X, y, test_size=0.2, random_state=28)
 
         # Perform linear regression
         linear_model = LinearRegression()
-        linear_model.fit(X_train, y_train)
+        linear_model.fit(X, y)
         linear_mse = np.mean((linear_model.predict(X_test) - y_test) ** 2)
 
         # Perform Lasso regression to find the optimal alpha
         lasso_alpha, _, _, _ = self.find_best_alpha(X, y)
         lasso_model = Lasso(alpha=lasso_alpha)
-        lasso_model.fit(X_train, y_train)
+        lasso_model.fit(X, y)
         lasso_mse = np.mean((lasso_model.predict(X_test) - y_test) ** 2)
 
         # Perform Ridge regression to find the optimal alpha
         ridge_alpha, _, _, _ = self.find_best_alpha(X, y)
         ridge_model = Ridge(alpha=ridge_alpha)
-        ridge_model.fit(X_train, y_train)
+        ridge_model.fit(X, y)
         ridge_mse = np.mean((ridge_model.predict(X_test) - y_test) ** 2)
 
         print('MSE for Linear Regression:', round(linear_mse,2))
@@ -253,20 +253,20 @@ class RegressionEvaluation:
         coef = selected_model.coef_
         intercept = selected_model.intercept_
 
-        formula_parts = []
+        linear_formula_parts = []
         for i, feature_name in enumerate(X.columns):
             coefficient = coef[i]
             if coefficient != 0:
-                formula_parts.append(f"({coefficient:.2f} * {feature_name})")
+                linear_formula_parts.append(f"({coefficient:.2f} * {feature_name})")
 
-        formula = f"{intercept:.2f} + {' + '.join(formula_parts)}"
+        formula = f"{intercept:.2f} + {' + '.join(linear_formula_parts)}"
         print(selected_model_name + " Regression Formula:")
         print(formula)
 
         # Optimal coefficients for each model
-        coefs_linear = linear_model.coef_
-        coefs_lasso = lasso_model.coef_
-        coefs_ridge = ridge_model.coef_
+        linear_coef = linear_model.coef_
+        lasso_coef = lasso_model.coef_
+        ridge_coef = ridge_model.coef_
 
         # Create bar plots for coefficients
         labels = X.columns
@@ -275,25 +275,25 @@ class RegressionEvaluation:
         fig, axes = plt.subplots(nrows=3, ncols=1, figsize=(15, 15), sharey=True)
 
         # Set common y-axis limits
-        y_min = min(min(coefs_linear), min(coefs_lasso), min(coefs_ridge))*1.2
-        y_max = max(max(coefs_linear), max(coefs_lasso), max(coefs_ridge))*1.2
+        y_min = min(min(linear_coef), min(lasso_coef), min(ridge_coef))*1.2
+        y_max = max(max(linear_coef), max(lasso_coef), max(ridge_coef))*1.2
 
         # Linear Regression Coefficients
-        bars_ridge = axes[0].bar(labels, coefs_linear, color='r', alpha=0.7)
+        bars_ridge = axes[0].bar(labels, linear_coef, color='r', alpha=0.7)
         axes[0].set_title('Coefficients Linear')
         axes[0].set_xlabel('Features')
         axes[0].set_ylabel('Coefficient')
         axes[0].set_ylim([y_min, y_max])
 
         # Lasso Regression Coefficients
-        bars_lasso = axes[1].bar(labels, coefs_lasso, color='b', alpha=0.7)
+        bars_lasso = axes[1].bar(labels, lasso_coef, color='b', alpha=0.7)
         axes[1].set_title('Coefficients Lasso')
         axes[1].set_xlabel('Features')
         axes[1].set_ylabel('Coefficient')
         axes[0].set_ylim([y_min, y_max])
 
         # Ridge Regression Coefficients
-        bars_ridge = axes[2].bar(labels, coefs_ridge, color='g', alpha=0.7)
+        bars_ridge = axes[2].bar(labels, ridge_coef, color='g', alpha=0.7)
         axes[2].set_title('Coefficients Ridge')
         axes[2].set_xlabel('Features')
         axes[2].set_ylabel('Coefficient')
@@ -335,7 +335,7 @@ class RegressionEvaluation:
         None (Prints MSE scores for each model.)
         """
         # Split the data into training and testing sets
-        X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=28)
+        X, X_test, y, y_test = train_test_split(X, y, test_size=0.2, random_state=28)
 
         # Initialize the models
         linear_model = LinearRegression()
@@ -343,9 +343,9 @@ class RegressionEvaluation:
         ridge_model = Ridge()
 
         # Fit the models and obtain the mse
-        linear_model.fit(X_train, y_train)
-        lasso_model.fit(X_train, y_train)
-        ridge_model.fit(X_train, y_train)
+        linear_model.fit(X, y)
+        lasso_model.fit(X, y)
+        ridge_model.fit(X, y)
         linear_mse = np.mean((linear_model.predict(X_test) - y_test) ** 2)
         lasso_mse = np.mean((lasso_model.predict(X_test) - y_test) ** 2)
         ridge_mse = np.mean((ridge_model.predict(X_test) - y_test) ** 2)    
@@ -366,4 +366,129 @@ class RegressionEvaluation:
         print("Cross-validated for Ridge model MSE scores:", ridge_mse_cv_scores)
         print("Mean MSE for Ridge model with cross-validation:", np.mean(ridge_mse_cv_scores))
 
+class ModelCoefficients:
+    def __init__(self) -> None:
+        pass
 
+    def get_coefficients(self, X: pd.DataFrame, y: pd.DataFrame):
+        """_summary_
+
+        Args:
+            X (pd.DataFrame): _description_
+            y (pd.DataFrame): _description_
+        """
+        # Perform linear regression
+        linear_model = LinearRegression()
+        linear_model.fit(X, y)
+
+        # Perform Lasso regression to find the optimal alpha
+        lasso_alpha, _, _, _ = self.find_best_alpha(X, y)
+        lasso_model = Lasso(alpha=lasso_alpha)
+        lasso_model.fit(X, y)
+
+        # Perform Ridge regression to find the optimal alpha
+        ridge_alpha, _, _, _ = self.find_best_alpha(X, y)
+        ridge_model = Ridge(alpha=ridge_alpha)
+        ridge_model.fit(X, y)
+
+        # Print the regression formulas
+        linear_coef = linear_model.coef_
+        linear_intercept = linear_model.intercept_
+        lasso_coef = lasso_model.coef_
+        lasso_intercept = lasso_model.intercept_
+        ridge_coef = ridge_model.coef_
+        ridge_intercept = ridge_model.intercept_
+
+        linear_formula_parts = []
+        for i, feature_name in enumerate(X.columns):
+            coefficient = linear_coef[i]
+            if coefficient != 0:
+                linear_formula_parts.append(f"({coefficient:.2f} * {feature_name})")
+
+        linear_formula = f"{linear_intercept:.2f} + {' + '.join(linear_formula_parts)}"
+        print('Linear Model' + " Regression Formula:")
+        print(linear_formula)
+
+        lasso_formula_parts = []
+        for i, feature_name in enumerate(X.columns):
+            coefficient = lasso_coef[i]
+            if coefficient != 0:
+                lasso_formula_parts.append(f"({coefficient:.2f} * {feature_name})")
+
+        lasso_formula = f"{lasso_intercept:.2f} + {' + '.join(lasso_formula_parts)}"
+        print('Lasso Model' + " Regression Formula:")
+        print(lasso_formula)
+
+        ridge_formula_parts = []
+        for i, feature_name in enumerate(X.columns):
+            coefficient = ridge_coef[i]
+            if coefficient != 0:
+                ridge_formula_parts.append(f"({coefficient:.2f} * {feature_name})")
+
+        ridge_formula = f"{ridge_intercept:.2f} + {' + '.join(ridge_formula_parts)}"
+        print('Ridge Model' + " Regression Formula:")
+        print(ridge_formula)
+
+        return linear_intercept, linear_coef, lasso_intercept, lasso_coef, ridge_intercept, ridge_coef
+    
+    def plot_coefficients(self, X: pd.DataFrame, y: pd.DataFrame):
+        """_summary_
+
+        Args:
+            X (pd.DataFrame): _description_
+            y (pd.DataFrame): _description_
+        """
+        # Get coefficients
+        _, linear_coef, _, lasso_coef, _, ridge_coef = self.get_coefficients(X, y)
+
+        # Create bar plots for coefficients
+        labels = X.columns
+
+        # Create subplots with shared y-axis
+        fig, axes = plt.subplots(nrows=3, ncols=1, figsize=(15, 15), sharey=True)
+
+        # Set common y-axis limits
+        y_min = min(min(linear_coef), min(lasso_coef), min(ridge_coef))*1.2
+        y_max = max(max(linear_coef), max(lasso_coef), max(ridge_coef))*1.2
+
+        # Linear Regression Coefficients
+        bars_ridge = axes[0].bar(labels, linear_coef, color='r', alpha=0.7)
+        axes[0].set_title('Coefficients Linear')
+        axes[0].set_xlabel('Features')
+        axes[0].set_ylabel('Coefficient')
+        axes[0].set_ylim([y_min, y_max])
+
+        # Lasso Regression Coefficients
+        bars_lasso = axes[1].bar(labels, lasso_coef, color='b', alpha=0.7)
+        axes[1].set_title('Coefficients Lasso')
+        axes[1].set_xlabel('Features')
+        axes[1].set_ylabel('Coefficient')
+        axes[0].set_ylim([y_min, y_max])
+
+        # Ridge Regression Coefficients
+        bars_ridge = axes[2].bar(labels, ridge_coef, color='g', alpha=0.7)
+        axes[2].set_title('Coefficients Ridge')
+        axes[2].set_xlabel('Features')
+        axes[2].set_ylabel('Coefficient')
+        axes[0].set_ylim([y_min, y_max])
+
+        # Rotate x-axis labels
+        for ax in axes:
+            ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha='right')
+
+        # Annotate the values on the bars
+        def annotate_bars(bars, ax):
+            for bar in bars:
+                height = bar.get_height()
+                ax.annotate(f'{height:.2f}', 
+                            xy=(bar.get_x() + bar.get_width() / 2, height),
+                            xytext=(0, 3),  # 3 points vertical offset
+                            textcoords="offset points",
+                            ha='center', va='bottom')
+
+        annotate_bars(bars_lasso, axes[0])
+        annotate_bars(bars_ridge, axes[1])
+        annotate_bars(bars_ridge, axes[2])
+
+        plt.tight_layout()
+        plt.show()
