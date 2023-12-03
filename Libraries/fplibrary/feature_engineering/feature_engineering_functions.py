@@ -5,13 +5,14 @@ import openmeteo_requests
 import requests_cache
 from retry_requests import retry
 
+
 class Feature(ABC):
     """
     An abstract class for feature transformation.
     """
     
     @abstractmethod
-    def transform(self):
+    def transform(self, cols):
         raise NotImplementedError
     
 
@@ -34,6 +35,7 @@ class Standardizer(Feature):
             self.data[i] = (self.data[i] - np.mean(self.data[i])) / np.std(self.data[i])
         
         return self.data
+
 
 class Normalizer(Feature):
     """
@@ -60,30 +62,33 @@ class Normalizer(Feature):
                 normalized_column.append(normalized_value)
             self.data[i] = normalized_column
         return self.data
-    
-class Date:
+
+
+class Date(Feature):
     """
     A class for handling date-related operations in a dataset.
 
     Methods:
-    - split_date(df, column_to_split)
-        Split a date column into new features (day of week, month, year).
+        transform(df, column_to_split)
+            Split a date column into new features (day of week, month, year).
 
     Attributes:
-    - None
+        data (pd.DataFrame): Dataframe containing data of interest.
     """
-    def __init__(self) -> None:
-        pass
-    def split_date(self, df, coluumn_to_split):
+
+    def __init__(self, data):
+        self.data = data
+
+    def transform(self, coluumn_to_split):
         # Convert the 'date' column to datetime format
-        df[coluumn_to_split] = pd.to_datetime(df[coluumn_to_split])
+        self.data[coluumn_to_split] = pd.to_datetime(self.data[coluumn_to_split])
 
         # Create new features based on date
-        df['day_of_week'] = df[coluumn_to_split].dt.dayofweek
-        df['month'] = df[coluumn_to_split].dt.month
-        df['year'] = df[coluumn_to_split].dt.year
+        self.data['day_of_week'] = self.data[coluumn_to_split].dt.dayofweek
+        self.data['month'] = self.data[coluumn_to_split].dt.month
+        self.data['year'] = self.data[coluumn_to_split].dt.year
+        return self.data
 
-        return df
 
 class Encoding:
     """
@@ -143,13 +148,6 @@ class Encoding:
         self.data[feature] = self.data[feature].map(encoding_map)
 
         return self.data
-
-# It uses the latitude and longitude info but rounded up so there are not so many consultation, otherwise the API shuts down
-# It gets data about min and max temp, precipitation per day and max wind speed
-# With that I get all the outputs, if you think there is something not relevant just take it out
-# You need to install these
-# pip install openmeteo-requests
-# pip install requests-cache retry-requests numpy pandas
 
 
 class WeatherFeatures:
@@ -245,7 +243,3 @@ class WeatherFeatures:
         self.data.drop(columns=['lat','lon'], inplace=True)
 
         return self.data
-
-
-
-
