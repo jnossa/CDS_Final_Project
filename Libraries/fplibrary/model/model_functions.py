@@ -86,7 +86,17 @@ class CrossValidation:
         
 
 class HyperparameterTuning:
-    
+    """
+    A class for performing hyperparameter tuning for Lasso and Ridge regression models.
+
+    Methods:
+        find_best_alpha(data)
+            Find the best alpha and minimum Mean Squared Error (MSE) for Lasso and Ridge regression.
+
+    Attributes:
+        _features (list): List of feature columns used for regression.
+        _target (str): Name of the target variable for regression.
+    """
     def __init__(self, features, target):
         self._features = features
         self._target = target

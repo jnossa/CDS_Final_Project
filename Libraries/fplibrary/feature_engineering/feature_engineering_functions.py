@@ -89,6 +89,26 @@ class Date(Feature):
         self.data['year'] = self.data[coluumn_to_split].dt.year
         return self.data
 
+class Rate(Feature):
+    """
+    A class for calculating and handling rates of two features in a dataset.
+
+    Methods:
+        transform(feature1, feature2)
+            Calculate the rate of feature1 over feature2 and add a new 'rate' column to the dataset.
+
+    Attributes:
+        data (pd.DataFrame): DataFrame containing data of interest.
+    """
+
+    def __init__(self, data):
+        self.data = data
+
+    def transform(self, feature1, feature2):
+        # Get the rate of feature1 over feature2
+        self.data['rate'] = self.data[feature1] / self.data[feature2]
+
+        return self.data
 
 class Encoding:
     """
@@ -110,6 +130,12 @@ class Encoding:
 
     - target_encoding(feature, target):
       Perform target encoding on a categorical feature in the dataset based on the target variable.
+
+    - lower_floors
+      Create a dummy variable for apartments in a floor lower than a given limit.
+
+    - center_apartments
+      Create a dummy variable for apartments with a distance lower than a given limit
     """
     def __init__(self, data):
         self.data = data
@@ -148,9 +174,29 @@ class Encoding:
         self.data[feature] = self.data[feature].map(encoding_map)
 
         return self.data
+    
+    def lower_floors(self, floor_threshold):
+        self.data['lower_floor'] = np.where(self.data['floor'] > floor_threshold, 0, 1)
+
+        return self.data
+    
+    def center_apartments(self, distance_threshold):
+        self.data['center_apartments'] = np.where(self.data['centreDistance'] > distance_threshold, 0, 1)
+
+        return self.data
 
 
 class WeatherFeatures:
+    """
+    A class for integrating weather data into a DataFrame based on latitude and longitude information.
+
+    Methods:
+        obtain_weather(start_date='2022-11-29', end_date='2023-11-28')
+            Obtain weather data from OpenMeteo for a given date range and integrate it into the DataFrame.
+
+    Attributes:
+        data (pd.DataFrame): DataFrame containing latitude and longitude information.
+    """
     
     def __init__(self, data):
         self.data = data
