@@ -5,11 +5,36 @@ import numpy as np
 
     
 class ExplorationPlots:
+    """
+    A class for creating exploratory plots to analyze and visualize data distributions and relationships.
+
+    Methods:
+        create_boxplot(y_feature, x_features, color='coolwarm', n_rows=1, n_cols=None)
+            Create box plots to visualize the distribution of a target variable across different groups or features.
+
+        create_scatter_plot(features, n_rows=1, n_cols=None, color='terrain')
+            Create scatter plots to visualize the relationship between two features.
+
+        create_histogram(features, bins=10, color='RdYlBu_r', n_rows=1, n_cols=None)
+            Create histograms to visualize the distribution of one or more features.
+    """
     def __init__(self, data):
         self.data = data
 
-    def create_boxplot(self, y_feature, x_features: str or list, color: str = 'coolwarm', n_rows: int = 1,
-                       n_cols: int = None):
+    def create_boxplot(self, y_feature, x_features: str or list, color: str = 'coolwarm', n_rows: int = 1, n_cols: int = None):
+        """
+        Create box plots to visualize the distribution of a target variable across different groups or features.
+
+        Parameters:
+        - y_feature (str): The target variable for the box plot.
+        - x_features (str or list): The features or categories to create box plots for.
+        - color (str): The color palette for the box plots (default: 'coolwarm').
+        - n_rows (int): Number of rows for subplots (default: 1).
+        - n_cols (int): Number of columns for subplots. If None, it will be set to the length of x_features.
+
+        Returns:
+        - None
+        """
         if n_cols is None:
             n_cols = len(x_features)
 
@@ -29,6 +54,18 @@ class ExplorationPlots:
         plt.show()
 
     def create_scatter_plot(self, features: tuple or list, n_rows: int=1, n_cols: int=None, color='terrain'):
+        """
+        Create scatter plots to visualize the relationship between two features.
+
+        Parameters:
+        - features (tuple or list): Each tuple or list should contain exactly two features for the scatter plot.
+        - n_rows (int): Number of rows for subplots (default: 1).
+        - n_cols (int): Number of columns for subplots. If None, it will be set to the length of features.
+        - color (str): The color map for the scatter plots (default: 'terrain').
+
+        Returns:
+        - None
+        """
         if isinstance(features, tuple):
             features = [features]
 
@@ -55,6 +92,19 @@ class ExplorationPlots:
         plt.show()
 
     def create_histogram(self, features: str or list, bins: int = 10, color='RdYlBu_r', n_rows: int = 1, n_cols: int = None):
+        """
+        Create histograms to visualize the distribution of one or more features.
+
+        Parameters:
+        - features (str or list): The features to create histograms for.
+        - bins (int or list): The number of bins or bin edges for the histograms (default: 10).
+        - color (str): The color map for the histograms (default: 'RdYlBu_r').
+        - n_rows (int): Number of rows for subplots (default: 1).
+        - n_cols (int): Number of columns for subplots. If None, it will be set to the length of features.
+
+        Returns:
+        - None
+        """
         if not isinstance(bins, list):
             bins = [bins] * len(features)
 
@@ -105,7 +155,15 @@ class Correlation:
         self.data = data
     
     def visualize_data_correlation(self, features: list):
+        """
+        Generate pairplot and correlation matrix heatmap for selected features.
 
+        Parameters:
+        - features (list): List of features to be included in the correlation analysis.
+
+        Returns:
+        - None
+        """
         # Correlation matrix heatmap
         corr_matrix = self.data[features].corr()
         plt.figure(figsize=(10, 8))

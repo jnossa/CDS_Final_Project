@@ -31,6 +31,15 @@ class Standardizer(Feature):
         self.data = data
 
     def transform(self, cols):
+        """
+        Standardize specified columns in the provided dataset.
+
+        Parameters:
+        - cols (list): List of column names to be standardized.
+
+        Returns:
+        - pd.DataFrame: DataFrame with specified columns standardized.
+        """
         for i in cols:
             self.data[i] = (self.data[i] - np.mean(self.data[i])) / np.std(self.data[i])
         
@@ -52,6 +61,15 @@ class Normalizer(Feature):
         self.data = data
 
     def transform(self, cols):
+        """
+        Normalize specified columns in the provided dataset.
+
+        Parameters:
+        - cols (list): List of column names to be normalized.
+
+        Returns:
+        - pd.DataFrame: DataFrame with specified columns normalized.
+        """
         for i in cols:
             min_value = min(self.data[i])
             max_value = max(self.data[i])
@@ -80,6 +98,15 @@ class Date(Feature):
         self.data = data
 
     def transform(self, coluumn_to_split):
+        """
+        Split a date column into new features (day of week, month, year).
+
+        Parameters:
+        - column_to_split (str): Name of the date column to be transformed.
+
+        Returns:
+        - pd.DataFrame: DataFrame with new date-related features.
+        """
         # Convert the 'date' column to datetime format
         self.data[coluumn_to_split] = pd.to_datetime(self.data[coluumn_to_split])
 
@@ -105,6 +132,16 @@ class Rate(Feature):
         self.data = data
 
     def transform(self, feature1, feature2):
+        """
+        Calculate the rate of feature1 over feature2 and add a new 'rate' column to the dataset.
+
+        Parameters:
+        - feature1 (str): Name of the numerator feature.
+        - feature2 (str): Name of the denominator feature.
+
+        Returns:
+        - pd.DataFrame: DataFrame with a new 'rate' column.
+        """
         # Get the rate of feature1 over feature2
         self.data['rate'] = self.data[feature1] / self.data[feature2]
 
@@ -141,13 +178,32 @@ class Encoding:
         self.data = data
 
     def mapping(self, features: list, mapping_dict):
+        """
+        Map values of specified features in the dataset based on given mapping dictionaries.
+
+        Parameters:
+        - features (list): List of feature names to be mapped.
+        - mapping_dict (dict): Dictionary containing mapping values for each feature.
+
+        Returns:
+        - pd.DataFrame: DataFrame with mapped values for specified features.
+        """
         for feature in features:
             self.data[feature] = self.data[feature].map(mapping_dict)
 
         return self.data
     
     def return_closest_key(self, col: str, mapping_dict):
-        
+        """
+        Replace numerical values in a column with the closest key from a mapping dictionary.
+
+        Parameters:
+        - col (str): Name of the column to be transformed.
+        - mapping_dict (dict): Dictionary containing numerical values and their corresponding keys.
+
+        Returns:
+        - pd.DataFrame: DataFrame with transformed column.
+        """        
         def find_closest_key(value):
             return min(mapping_dict, key=lambda x: abs(mapping_dict[x] - value))
     
@@ -157,6 +213,15 @@ class Encoding:
         
 
     def one_hot_encoding(self, feature):
+        """
+        Perform one-hot encoding on a categorical feature in the dataset.
+
+        Parameters:
+        - feature (str): Name of the categorical feature.
+
+        Returns:
+        - pd.DataFrame: DataFrame with one-hot encoded columns.
+        """
         encoded_feature = pd.get_dummies(self.data[feature], prefix=feature, drop_first=True)
         encoded_feature = encoded_feature.applymap(lambda x: 1 if x > 0 else 0)
         self.data = pd.concat([self.data, encoded_feature], axis=1)
@@ -165,22 +230,59 @@ class Encoding:
         return self.data
     
     def label_encoding(self, feature):
+        """
+        Perform label encoding on a categorical feature in the dataset.
+
+        Parameters:
+        - feature (str): Name of the categorical feature.
+
+        Returns:
+        - pd.DataFrame: DataFrame with label encoded column.
+        """
         self.data[feature] = pd.factorize(self.data[feature])[0]
 
         return self.data
 
     def target_encoding(self, feature, target):
+        """
+        Perform target encoding on a categorical feature in the dataset based on the target variable.
+
+        Parameters:
+        - feature (str): Name of the categorical feature.
+        - target (str): Name of the target variable.
+
+        Returns:
+        - pd.DataFrame: DataFrame with target encoded column.
+        """
         encoding_map = self.data.groupby(feature)[target].mean().to_dict()
         self.data[feature] = self.data[feature].map(encoding_map)
 
         return self.data
     
     def lower_floors(self, floor_threshold):
+        """
+        Create a dummy variable for apartments on lower floors than a given threshold.
+
+        Parameters:
+        - floor_threshold (int): Threshold for considering floors as lower.
+
+        Returns:
+        - pd.DataFrame: DataFrame with a new dummy variable indicating lower floors.
+        """
         self.data['lower_floor'] = np.where(self.data['floor'] > floor_threshold, 0, 1)
 
         return self.data
     
     def center_apartments(self, distance_threshold):
+        """
+        Create a dummy variable for apartments with a distance to the center lower than a given threshold.
+
+        Parameters:
+        - distance_threshold (float): Threshold for considering apartments close to the center.
+
+        Returns:
+        - pd.DataFrame: DataFrame with a new dummy variable indicating center apartments.
+        """
         self.data['center_apartments'] = np.where(self.data['centreDistance'] > distance_threshold, 0, 1)
 
         return self.data

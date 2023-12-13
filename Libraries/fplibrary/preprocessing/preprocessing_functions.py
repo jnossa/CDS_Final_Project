@@ -35,19 +35,63 @@ class MissingValues:
         self.data = data
 
     def remove_col(self, cols: list):
+        """
+        Remove specified columns containing missing values.
+
+        Parameters:
+        - cols: list
+          List of column names to be removed.
+
+        Returns:
+        - pandas DataFrame
+          The dataset after removing specified columns.
+        """
         self.data = self.data.drop(cols, axis=1)
         return self.data
 
     def remove_rows_with_nan(self, cols: list):
+        """
+        Remove rows containing NaN values in specified columns.
+
+        Parameters:
+        - cols: list
+          List of column names to check for NaN values.
+
+        Returns:
+        - pandas DataFrame
+          The dataset after removing rows with NaN values in specified columns.
+        """
         self.data = self.data.dropna(subset=cols)
         return self.data
 
     def fill_nan_with_mean(self, cols):
+        """
+        Fill NaN values in specified columns with the mean.
+
+        Parameters:
+        - cols: list
+          List of column names to be filled with mean values.
+
+        Returns:
+        - pandas DataFrame
+          The dataset after filling NaN values with mean in specified columns.
+        """
         for col in cols:
             self.data[col].fillna(self.data[col].mean(), inplace=True)
         return self.data
 
     def impute_missing_knn(self, n_neighbors):
+        """
+        Impute missing values using K-Nearest Neighbors algorithm.
+
+        Parameters:
+        - n_neighbors: int
+          Number of neighbors to consider for imputation.
+
+        Returns:
+        - pandas DataFrame
+          The dataset after imputing missing values using KNN.
+        """
         imputed_data = self.data.copy()
         numeric_columns = imputed_data.select_dtypes(include='number').columns
         numeric_columns = numeric_columns[imputed_data[numeric_columns].notnull().any()]
@@ -61,6 +105,13 @@ class MissingValues:
         return self.data
 
     def missing_values_summary(self):
+        """
+        Calculate the total missing values and percentage for each column and provide a summary.
+
+        Returns:
+        - pandas DataFrame
+          A summary of missing values in the dataset.
+        """
         missing_data = self.data.isnull().sum()
         percentage_missing = (missing_data / len(self.data)) * 100
 
@@ -103,12 +154,32 @@ class Outliers:
         self.data = data
 
     def plot_outliers(self, columns):
+        """
+        Plot boxplot to visualize the distribution of specified columns.
+
+        Parameters:
+        - columns: list
+          List of column names to be visualized.
+
+        Returns:
+        - None
+        """
         # Plot boxplot
         plt.figure(figsize=(12, 8))
         sns.boxplot(data=self.data[columns])
         plt.title('Representation of the data:')
 
     def detect_outliers(self, columns):
+        """
+        Detect outliers using the Interquartile Range (IQR) method for specified columns.
+
+        Parameters:
+        - columns: list
+          List of column names to detect outliers.
+
+        Returns:
+        - None
+        """
         data = self.data.copy()
         for col in self.data[columns]:
             data[col] = data[col].fillna(self.data[col].mean())
@@ -125,6 +196,20 @@ class Outliers:
             print(f'The number of outliers for {col} are {len(outliers)}.')
 
     def winsorize(self, columns=None, limits=(0.05, 0.05)):
+        """
+        Apply winsorization to limit extreme values in specified columns.
+
+        Parameters:
+        - columns: list (optional)
+          List of column names to be winsorized. If not provided, all numeric columns will be considered.
+
+        - limits: tuple, default=(0.05, 0.05)
+          Tuple of lower and upper percentage limits for winsorization.
+
+        Returns:
+        - pandas DataFrame
+          The dataset after winsorization.
+        """
         if columns is None:
             columns = self.data.columns
 
@@ -142,6 +227,23 @@ class Outliers:
         return self.data
 
     def impute_with_null(self, columns, below=None, above=None):
+        """
+        Add missing values to specified columns based on specified thresholds.
+
+        Parameters:
+        - columns: list
+          List of column names to be considered for imputation.
+
+        - below: float or int (optional)
+          Threshold value. If provided, values below this threshold will be set to NaN.
+
+        - above: float or int (optional)
+          Threshold value. If provided, values above this threshold will be set to NaN.
+
+        Returns:
+        - pandas DataFrame
+          The dataset after imputing missing values.
+        """
         for column in columns:
             # Ensure the column is present in the DataFrame
             if column not in self.data.columns:

@@ -35,15 +35,39 @@ class Model:
         self.model = model(**hyperparameters) if hyperparameters else model
 
     def train(self, df_train):
+        """
+        Trains the model using the provided training data.
+
+        Parameters:
+        - df_train (pd.DataFrame): DataFrame containing the training data.
+        """
         self.model.fit(df_train[self._features], df_train[self._target])
     
     def predict(self, data):
+        """
+        Predicts using the trained model on the provided data and returns predicted probabilities.
+
+        Parameters:
+        - data (pd.DataFrame): DataFrame containing the data to make predictions on.
+
+        Returns:
+        - np.array: Predicted values.
+        """
         X_test = data[self._features]
 
         return self.model.predict(X_test)
     
     def accuracy(self, data, pred):
+        """
+        Reports the mean squared error accuracy of predictions.
 
+        Parameters:
+        - data (pd.DataFrame): DataFrame containing the true target values.
+        - pred (np.array): Predicted values.
+
+        Returns:
+        - float: Mean squared error accuracy.
+        """
         return mean_squared_error(data[self._target], pred)
 
 class CrossValidation:
@@ -67,6 +91,18 @@ class CrossValidation:
         
     # Performing 5-fold cross-validation
     def regression_accuracy(self, data):
+        """
+        Perform 5-fold cross-validation for regression and print mean squared error.
+
+        Parameters:
+        - data (pd.DataFrame): DataFrame containing the data.
+
+        Example:
+        ```python
+        # Perform regression cross-validation on the data
+        cross_validator.regression_accuracy(data)
+        ```
+        """
         kf = KFold(n_splits=5, shuffle=True, random_state=42)
         cv_results = cross_val_score(self.model, data[self._features], data[self._target], cv=kf, scoring='neg_mean_squared_error')
 
@@ -76,6 +112,18 @@ class CrossValidation:
         print(f"Mean squared error: {(cv_results.mean())*-1:.2f} +/- {cv_results.std():.2f}")
     
     def classification_accuracy(self, data):
+        """
+        Perform 10-fold cross-validation for classification and print accuracy.
+
+        Parameters:
+        - data (pd.DataFrame): DataFrame containing the data.
+
+        Example:
+        ```python
+        # Perform classification cross-validation on the data
+        cross_validator.classification_accuracy(data)
+        ```
+        """
         kf = KFold(n_splits=10, shuffle=True, random_state=42)
         cv_results = cross_val_score(self.model, data[self._features], data[self._target], cv=kf)
 
@@ -156,6 +204,22 @@ class HyperparameterTuning:
 
 
 class RegressionEvaluation:
+    """
+    A class for evaluating linear regression models, Lasso regression, and Ridge regression.
+
+    Methods:
+    - find_best_alpha(X, y)
+      Find the best alpha and minimum MSE for Lasso and Ridge regression.
+
+    - find_best_regression_model(X, y)
+      Perform linear regression, Lasso regression, and Ridge regression with cross-validated alpha selection.
+
+    - cross_validation(X, y, k=10)
+      Perform K-fold cross-validation for Linear Regression, Lasso, and Ridge models and compare MSE scores.
+
+    Attributes:
+    - None
+    """
     def __init__(self) -> None:
         pass
 
@@ -377,15 +441,37 @@ class RegressionEvaluation:
         print("Mean MSE for Ridge model with cross-validation:", np.mean(ridge_mse_cv_scores))
 
 class ModelCoefficients:
+    """
+    A class for obtaining and visualizing coefficients of linear regression, Lasso regression, and Ridge regression models.
+
+    Methods:
+    - get_coefficients(X, y)
+      Get the intercept and coefficients of linear, Lasso, and Ridge regression models.
+
+    - plot_coefficients(X, y)
+      Plot bar plots for the coefficients of linear, Lasso, and Ridge regression models.
+
+    Attributes:
+    - None
+    """
     def __init__(self) -> None:
         pass
 
     def get_coefficients(self, X: pd.DataFrame, y: pd.DataFrame):
-        """_summary_
+        """
+        Get the intercept and coefficients of linear, Lasso, and Ridge regression models.
 
-        Args:
-            X (pd.DataFrame): _description_
-            y (pd.DataFrame): _description_
+        Parameters:
+        - X: Pandas DataFrame, features.
+        - y: Pandas Series, target variable.
+
+        Returns:
+        - linear_intercept: float, intercept of the linear regression model.
+        - linear_coef: np.ndarray, coefficients of the linear regression model.
+        - lasso_intercept: float, intercept of the Lasso regression model.
+        - lasso_coef: np.ndarray, coefficients of the Lasso regression model.
+        - ridge_intercept: float, intercept of the Ridge regression model.
+        - ridge_coef: np.ndarray, coefficients of the Ridge regression model.
         """
         # Perform linear regression
         linear_model = LinearRegression()
@@ -442,11 +528,15 @@ class ModelCoefficients:
         return linear_intercept, linear_coef, lasso_intercept, lasso_coef, ridge_intercept, ridge_coef
     
     def plot_coefficients(self, X: pd.DataFrame, y: pd.DataFrame):
-        """_summary_
+        """
+        Plot bar plots for the coefficients of linear, Lasso, and Ridge regression models.
 
-        Args:
-            X (pd.DataFrame): _description_
-            y (pd.DataFrame): _description_
+        Parameters:
+        - X: Pandas DataFrame, features.
+        - y: Pandas Series, target variable.
+
+        Returns:
+        None
         """
         # Get coefficients
         _, linear_coef, _, lasso_coef, _, ridge_coef = self.get_coefficients(X, y)
