@@ -155,7 +155,7 @@ We welcome contributions from the community to enhance and improve this project.
 
 **- Code Comments:** Improve code comments to make the codebase more understandable for contributors and users.
 
-## Code Quality
+### Code Quality
 **- Code Reviews:** Participate in code reviews to maintain code quality and consistency. Offer constructive feedback and suggestions.
 
 **- Coding Standards:** Ensure that code contributions adhere to the established coding standards.
