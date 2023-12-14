@@ -203,243 +203,6 @@ class HyperparameterTuning:
         
 
 
-class RegressionEvaluation:
-    """
-    A class for evaluating linear regression models, Lasso regression, and Ridge regression.
-
-    Methods:
-    - find_best_alpha(X, y)
-      Find the best alpha and minimum MSE for Lasso and Ridge regression.
-
-    - find_best_regression_model(X, y)
-      Perform linear regression, Lasso regression, and Ridge regression with cross-validated alpha selection.
-
-    - cross_validation(X, y, k=10)
-      Perform K-fold cross-validation for Linear Regression, Lasso, and Ridge models and compare MSE scores.
-
-    Attributes:
-    - None
-    """
-    def __init__(self) -> None:
-        pass
-
-    def find_best_alpha(self, X: pd.DataFrame, y: pd.DataFrame):
-        """
-        Find the best alpha and minimum MSE for Lasso and Ridge regression.
-
-        Parameters:
-        - X: Pandas DataFrame, features.
-        - y: Pandas Series, target variable.
-
-        Returns:
-        - best_alpha_lasso: float, best alpha for Lasso.
-        - min_mse_lasso: float, minimum MSE for Lasso.
-        - best_alpha_ridge: float, best alpha for Ridge.
-        - min_mse_ridge: float, minimum MSE for Ridge.
-        """
-        # Split the data into training and testing sets
-        X, X_test, y, y_test = train_test_split(X, y, test_size=0.2, random_state=28)
-
-        # Define a range of alpha values to try
-        alphas = np.logspace(-10, 0, 50)
-
-        # Initialize variables to store the best alpha and minimum MSE
-        best_alpha_lasso = None
-        best_alpha_ridge = None
-        min_mse_lasso = float('inf')
-        min_mse_ridge = float('inf')
-
-        # Loop over the alpha values and fit Lasso and Ridge models
-        for alpha in alphas:
-            # Fit Lasso model
-            lasso = Lasso(alpha=alpha)
-            lasso.fit(X, y)
-            y_pred_lasso = lasso.predict(X_test)
-            mse_lasso = mean_squared_error(y_test, y_pred_lasso)
-
-            # Update best alpha and minimum MSE for Lasso
-            if mse_lasso < min_mse_lasso:
-                min_mse_lasso = mse_lasso
-                best_alpha_lasso = alpha
-
-            # Fit Ridge model
-            ridge = Ridge(alpha=alpha)
-            ridge.fit(X, y)
-            y_pred_ridge = ridge.predict(X_test)
-            mse_ridge = mean_squared_error(y_test, y_pred_ridge)
-
-            # Update best alpha and minimum MSE for Ridge
-            if mse_ridge < min_mse_ridge:
-                min_mse_ridge = mse_ridge
-                best_alpha_ridge = alpha
-
-        return best_alpha_lasso, min_mse_lasso, best_alpha_ridge, min_mse_ridge
-        
-    def find_best_regression_model(self, X: pd.DataFrame, y: pd.DataFrame):
-        """
-        Perform linear regression, Lasso regression, and Ridge regression with cross-validated alpha selection.
-
-        Parameters:
-        - X: Pandas DataFrame, features.
-        - y: Pandas Series, target variable.
-
-        Returns:
-        - selected_model: sklearn model, the selected regression model.
-        - selected_model_name: str, the name of the selected regression model.
-        - formula: str, the regression formula for the best model.
-        """
-        # Split the data into training and testing sets
-        X, X_test, y, y_test = train_test_split(X, y, test_size=0.2, random_state=28)
-
-        # Perform linear regression
-        linear_model = LinearRegression()
-        linear_model.fit(X, y)
-        linear_mse = np.mean((linear_model.predict(X_test) - y_test) ** 2)
-
-        # Perform Lasso regression to find the optimal alpha
-        lasso_alpha, _, _, _ = self.find_best_alpha(X, y)
-        lasso_model = Lasso(alpha=lasso_alpha)
-        lasso_model.fit(X, y)
-        lasso_mse = np.mean((lasso_model.predict(X_test) - y_test) ** 2)
-
-        # Perform Ridge regression to find the optimal alpha
-        ridge_alpha, _, _, _ = self.find_best_alpha(X, y)
-        ridge_model = Ridge(alpha=ridge_alpha)
-        ridge_model.fit(X, y)
-        ridge_mse = np.mean((ridge_model.predict(X_test) - y_test) ** 2)
-
-        print('MSE for Linear Regression:', round(linear_mse,2))
-        print('MSE for LASSO:', round(lasso_mse,2))
-        print('MSE for Ridge:', round(ridge_mse,2))
-
-        # Choose the model with the lowest MSE
-        if linear_mse <= lasso_mse and linear_mse <= ridge_mse:
-            selected_model = linear_model
-            selected_model_name = "Linear Regression"
-        elif lasso_mse <= linear_mse and lasso_mse <= ridge_mse:
-            selected_model = lasso_model
-            selected_model_name = "Lasso Regression"
-        else:
-            selected_model = ridge_model
-            selected_model_name = "Ridge Regression"
-
-        # Print the regression formula for best model
-        coef = selected_model.coef_
-        intercept = selected_model.intercept_
-
-        linear_formula_parts = []
-        for i, feature_name in enumerate(X.columns):
-            coefficient = coef[i]
-            if coefficient != 0:
-                linear_formula_parts.append(f"({coefficient:.2f} * {feature_name})")
-
-        formula = f"{intercept:.2f} + {' + '.join(linear_formula_parts)}"
-        print(selected_model_name + " Regression Formula:")
-        print(formula)
-
-        # Optimal coefficients for each model
-        linear_coef = linear_model.coef_
-        lasso_coef = lasso_model.coef_
-        ridge_coef = ridge_model.coef_
-
-        # Create bar plots for coefficients
-        labels = X.columns
-
-        # Create subplots with shared y-axis
-        fig, axes = plt.subplots(nrows=3, ncols=1, figsize=(15, 15), sharey=True)
-
-        # Set common y-axis limits
-        y_min = min(min(linear_coef), min(lasso_coef), min(ridge_coef))*1.2
-        y_max = max(max(linear_coef), max(lasso_coef), max(ridge_coef))*1.2
-
-        # Linear Regression Coefficients
-        bars_ridge = axes[0].bar(labels, linear_coef, color='r', alpha=0.7)
-        axes[0].set_title('Coefficients Linear')
-        axes[0].set_xlabel('Features')
-        axes[0].set_ylabel('Coefficient')
-        axes[0].set_ylim([y_min, y_max])
-
-        # Lasso Regression Coefficients
-        bars_lasso = axes[1].bar(labels, lasso_coef, color='b', alpha=0.7)
-        axes[1].set_title('Coefficients Lasso')
-        axes[1].set_xlabel('Features')
-        axes[1].set_ylabel('Coefficient')
-        axes[0].set_ylim([y_min, y_max])
-
-        # Ridge Regression Coefficients
-        bars_ridge = axes[2].bar(labels, ridge_coef, color='g', alpha=0.7)
-        axes[2].set_title('Coefficients Ridge')
-        axes[2].set_xlabel('Features')
-        axes[2].set_ylabel('Coefficient')
-        axes[0].set_ylim([y_min, y_max])
-
-        # Rotate x-axis labels
-        for ax in axes:
-            ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha='right')
-
-        # Annotate the values on the bars
-        def annotate_bars(bars, ax):
-            for bar in bars:
-                height = bar.get_height()
-                ax.annotate(f'{height:.2f}', 
-                            xy=(bar.get_x() + bar.get_width() / 2, height),
-                            xytext=(0, 3),  # 3 points vertical offset
-                            textcoords="offset points",
-                            ha='center', va='bottom')
-
-        annotate_bars(bars_lasso, axes[0])
-        annotate_bars(bars_ridge, axes[1])
-        annotate_bars(bars_ridge, axes[2])
-
-        plt.tight_layout()
-        plt.show()
-
-        return selected_model, selected_model_name, formula
-    
-    def cross_validation(self, X: pd.DataFrame, y: pd.DataFrame, k: int=10):
-        """
-        Perform K-fold cross-validation for Linear Regression, Lasso, and Ridge models and compare MSE scores.
-
-        Parameters:
-        - X (pd.DataFrame): Features.
-        - y (pd.DataFrame): Target variable.
-        - k (int): Number of folds in the cross validation process. Default is 10.
-
-        Returns:
-        None (Prints MSE scores for each model.)
-        """
-        # Split the data into training and testing sets
-        X, X_test, y, y_test = train_test_split(X, y, test_size=0.2, random_state=28)
-
-        # Initialize the models
-        linear_model = LinearRegression()
-        lasso_model = Lasso()
-        ridge_model = Ridge()
-
-        # Fit the models and obtain the mse
-        linear_model.fit(X, y)
-        lasso_model.fit(X, y)
-        ridge_model.fit(X, y)
-        linear_mse = np.mean((linear_model.predict(X_test) - y_test) ** 2)
-        lasso_mse = np.mean((lasso_model.predict(X_test) - y_test) ** 2)
-        ridge_mse = np.mean((ridge_model.predict(X_test) - y_test) ** 2)    
-
-        # Use cross_val_score for cross-validated MSE
-        linear_mse_cv_scores = -cross_val_score(linear_model, X, y, cv=k, scoring='neg_mean_squared_error')
-        lasso_mse_cv_scores = -cross_val_score(lasso_model, X, y, cv=k, scoring='neg_mean_squared_error')
-        ridge_mse_cv_scores = -cross_val_score(ridge_model, X, y, cv=k, scoring='neg_mean_squared_error')
-
-        print("MSE for Linear model without cross-validation:", linear_mse)
-        print("MSE for Lasso model with 10 fold cross validation: ", lasso_mse)
-        print("MSE for Ridge model with 10 fold cross validation: ", ridge_mse)
-
-        print("Cross-validated for Linear model MSE scores:", linear_mse_cv_scores)
-        print("Mean MSE for Linear model with cross-validation:", np.mean(linear_mse_cv_scores))
-        print("Cross-validated for Lasso model MSE scores:", lasso_mse_cv_scores)
-        print("Mean MSE for Lasso model with cross-validation:", np.mean(lasso_mse_cv_scores))
-        print("Cross-validated for Ridge model MSE scores:", ridge_mse_cv_scores)
-        print("Mean MSE for Ridge model with cross-validation:", np.mean(ridge_mse_cv_scores))
-
 class ModelCoefficients:
     """
     A class for obtaining and visualizing coefficients of linear regression, Lasso regression, and Ridge regression models.
@@ -457,35 +220,39 @@ class ModelCoefficients:
     def __init__(self) -> None:
         pass
 
-    def get_coefficients(self, X: pd.DataFrame, y: pd.DataFrame):
+    def get_coefficients(self, linear_model, lasso_model, ridge_model):
         """
         Get the intercept and coefficients of linear, Lasso, and Ridge regression models.
 
         Parameters:
-        - X: Pandas DataFrame, features.
-        - y: Pandas Series, target variable.
+        - linear_model: sklearn.linear_model.LinearRegression
+        The trained linear regression model.
+        
+        - lasso_model: sklearn.linear_model.Lasso
+        The trained Lasso regression model.
+
+        - ridge_model: sklearn.linear_model.Ridge
+        The trained Ridge regression model.
 
         Returns:
-        - linear_intercept: float, intercept of the linear regression model.
-        - linear_coef: np.ndarray, coefficients of the linear regression model.
-        - lasso_intercept: float, intercept of the Lasso regression model.
-        - lasso_coef: np.ndarray, coefficients of the Lasso regression model.
-        - ridge_intercept: float, intercept of the Ridge regression model.
-        - ridge_coef: np.ndarray, coefficients of the Ridge regression model.
+        - linear_intercept: float
+        The intercept of the linear regression model.
+        
+        - linear_coef: np.ndarray
+        Coefficients of the linear regression model.
+        
+        - lasso_intercept: float
+        The intercept of the Lasso regression model.
+        
+        - lasso_coef: np.ndarray
+        Coefficients of the Lasso regression model.
+        
+        - ridge_intercept: float
+        The intercept of the Ridge regression model.
+        
+        - ridge_coef: np.ndarray
+        Coefficients of the Ridge regression model.
         """
-        # Perform linear regression
-        linear_model = LinearRegression()
-        linear_model.fit(X, y)
-
-        # Perform Lasso regression to find the optimal alpha
-        lasso_alpha, _, _, _ = self.find_best_alpha(X, y)
-        lasso_model = Lasso(alpha=lasso_alpha)
-        lasso_model.fit(X, y)
-
-        # Perform Ridge regression to find the optimal alpha
-        ridge_alpha, _, _, _ = self.find_best_alpha(X, y)
-        ridge_model = Ridge(alpha=ridge_alpha)
-        ridge_model.fit(X, y)
 
         # Print the regression formulas
         linear_coef = linear_model.coef_
