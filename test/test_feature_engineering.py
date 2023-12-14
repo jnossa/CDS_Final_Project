@@ -3,7 +3,7 @@ import pandas as pd
 import numpy as np
 
 # Import the Standardizer, Normalizer, Date, Encoding classes
-from fplibrary.feature_engineering import Standardizer, Normalizer, Date, Encoding, WeatherFeatures
+from fplibrary.feature_engineering import Standardizer, Normalizer, Date, Rate, Encoding, WeatherFeatures
 
 
 class TestStandardizer(unittest.TestCase):
@@ -81,6 +81,30 @@ class TestDate(unittest.TestCase):
             self.assertTrue(all(self.df[feature] == values))
 
 
+class TestRateClass(unittest.TestCase):
+
+    def setUp(self):
+        # Create a sample DataFrame for testing
+        self.sample_data = pd.DataFrame({
+            'feature1': [10, 20, 30, 40, 50],
+            'feature2': [2, 4, 6, 8, 10]
+        })
+
+        # Initialize Rate class with the sample data
+        self.rate_instance = Rate(self.sample_data)
+
+    def test_transform(self):
+        # Test transform method with feature1='feature1' and feature2='feature2'
+        result_data = self.rate_instance.transform(feature1='feature1', feature2='feature2')
+
+        # Check if the 'rate' column is added
+        self.assertIn('rate', result_data.columns)
+
+        # Check if the values in 'rate' are calculated correctly
+        expected_rate = [5.0, 5.0, 5.0, 5.0, 5.0]
+        self.assertListEqual(result_data['rate'].tolist(), expected_rate)
+
+
 class TestEncoding(unittest.TestCase):
 
     def setUp(self):
@@ -88,7 +112,7 @@ class TestEncoding(unittest.TestCase):
         data = {'Category': ['A', 'B', 'A', 'C', 'B', 'C'],
                 'Target': [1, 0, 1, 1, 0, 0]}
         self.df = pd.DataFrame(data)
-        self.encoding_instance = Encoding(self.df.copy())
+        self.encoding_instance = Encoding(self.df)
 
     def test_mapping(self):
         # Test the mapping method
@@ -126,6 +150,39 @@ class TestEncoding(unittest.TestCase):
         # Check if target encoding is performed correctly
         expected_values = [1.0, 0.0, 1.0, 0.5, 0.0, 0.5]
         self.assertTrue(all(self.encoding_instance.data['Category'] == expected_values))
+
+    def test_lower_floors(self):
+
+        data_floor = pd.DataFrame({
+            'floor': [1, 3, 5, 7, 2]
+        })
+        test_floor_feature = Encoding(data_floor)
+
+        # Test lower_floors method with a floor_threshold of 3
+        result_data = test_floor_feature.lower_floors(floor_threshold=3)
+
+        # Check if the 'lower_floor' column is added
+        self.assertIn('lower_floor', result_data.columns)
+
+        # Check if the values in 'lower_floor' are as expected
+        expected_lower_floor = [1, 1, 0, 0, 1]
+        self.assertListEqual(result_data['lower_floor'].tolist(), expected_lower_floor)
+
+    def test_center_apartments(self):
+        data_centre_distance = pd.DataFrame({
+            'centreDistance': [10.5, 5.6, 2.0, 15.2, 8.3, 0.5, 1]
+        })
+        test_centre_distance_feature = Encoding(data_centre_distance)
+
+        # Test center_apartments method with a distance_threshold of 200
+        result_data = test_centre_distance_feature.center_apartments(distance_threshold=1)
+
+        # Check if the 'center_apartments' column is added
+        self.assertIn('center_apartments', result_data.columns)
+
+        # Check if the values in 'center_apartments' are as expected
+        expected_center_apartments = [0, 0, 0, 0, 0, 1, 1]
+        self.assertListEqual(result_data['center_apartments'].tolist(), expected_center_apartments)
 
 
 class TestWeatherFeatures(unittest.TestCase):
