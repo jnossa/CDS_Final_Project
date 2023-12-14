@@ -39,13 +39,7 @@ The project repository is organized with the following structure:
 
 ## Library Usage
 
-To use the library, follow these steps:
-
-- Install the required dependencies:
-```
-pip install requirements.txt
-```
-- Install the library on your local machine. In order to do so, run the following command while in the Library folder:
+To use the library, install the library on your local machine. In order to do so, run the following command while in the Library folder:
 ```
 pip install -e .
 ```
@@ -62,18 +56,41 @@ Example of the pipeline that can be created:
 
 ```
 # Import necessary modules from the library
-from library.preprocessing import MissingValues, Outliers
-from library.features import Standardizer, Normalizer, Date, Encoding
-from library.models import Model, CrossValidation, RegressionEvaluation
+import fplibrary.exploration as e
+import fplibrary.feature_engineering as f
+import fplibrary.loading_data as l
+import fplibrary.preprocessing as p
+import fplibrary.model as m
 
-TODO: finish this!!!
+# Load data
+data_loader = l.DataLoader('data.csv')
+train_data, test_data = data_loader.load_and_split_data()
+
+# Example of data exploration
+plots = e.ExplorationPlots(all_data)
+plots.create_boxplot('target_variable', ['feature_1', 'feature_2'], n_rows=1, n_cols=2)
+
+# Example of data processing
+miss_fill = p.MissingValues(all_data)
+all_data = miss_fill.impute_missing_knn(5)
+
+# Example of feature engineering
+weather = f.WeatherFeatures(all_data)
+all_data = weather.obtain_weather()
+
+# Example of modelling
+lin_model = LinearRegression()
+lin_model_runner = m.Model(features, 'price', lin_model)
+lin_model_runner.train(train_data)
+lin_predict = lin_model_runner.predict(test_data)
+lin_model_runner.accuracy(test_data, lin_predict)
 ```
 
 ## Unit Tests
 
 The library includes comprehensive unit tests to ensure the correctness of its functionalities. You can run the tests using the following command:
  ```
- pytest tests/
+ pytest test/
  ```
 
 ##  Guidelines for Scaling the Library
@@ -117,3 +134,28 @@ Ensure that tests cover a range of scenarios and edge cases to guarantee robustn
 
 Include Jupyter notebooks or example scripts demonstrating how to use the library for end-to-end tasks.
 Showcase how to integrate new preprocessors, features, or models in these examples.
+
+##  How to contribute
+We welcome contributions from the community to enhance and improve this project. If you are interested in contributing, there are various areas where your expertise can make a significant impact:
+
+### Feature Enhancements
+**- New Features:** Propose and implement new features that align with the project's goals. Check the existing issues or suggest your own ideas.
+
+**- Model Evaluation Metrics:** Contribute new model evaluation metrics or improve existing ones to enhance the library's capabilities.
+
+**- Data Processing Methods:** Introduce new methods for data processing or improve existing ones to make the library more versatile.
+
+### Bug Fixes
+**- Bug Reports:** Help us identify and fix bugs by reporting them through GitHub issues. Include detailed descriptions and steps to reproduce.
+
+**- Bug Fixes:** Address existing bugs by providing solutions through pull requests.
+
+### Documentation
+**- Documentation Improvements:** Enhance the clarity and completeness of our documentation. Updates to guides, tutorials, and examples are highly valuable.
+
+**- Code Comments:** Improve code comments to make the codebase more understandable for contributors and users.
+
+## Code Quality
+**- Code Reviews:** Participate in code reviews to maintain code quality and consistency. Offer constructive feedback and suggestions.
+
+**- Coding Standards:** Ensure that code contributions adhere to the established coding standards.
