@@ -220,7 +220,7 @@ class ModelCoefficients:
     def __init__(self) -> None:
         pass
 
-    def get_coefficients(self, linear_model, lasso_model, ridge_model):
+    def get_coefficients(self, linear_model, lasso_model, ridge_model, X):
         """
         Get the intercept and coefficients of linear, Lasso, and Ridge regression models.
 
@@ -294,7 +294,7 @@ class ModelCoefficients:
 
         return linear_intercept, linear_coef, lasso_intercept, lasso_coef, ridge_intercept, ridge_coef
     
-    def plot_coefficients(self, X: pd.DataFrame, y: pd.DataFrame):
+    def plot_coefficients(self, linear_model, lasso_model, ridge_model, X):
         """
         Plot bar plots for the coefficients of linear, Lasso, and Ridge regression models.
 
@@ -306,7 +306,7 @@ class ModelCoefficients:
         None
         """
         # Get coefficients
-        _, linear_coef, _, lasso_coef, _, ridge_coef = self.get_coefficients(X, y)
+        _, linear_coef, _, lasso_coef, _, ridge_coef = self.get_coefficients(linear_model, lasso_model, ridge_model, X)
 
         # Create bar plots for coefficients
         labels = X.columns
@@ -343,19 +343,6 @@ class ModelCoefficients:
         for ax in axes:
             ax.set_xticklabels(ax.get_xticklabels(), rotation=45, ha='right')
 
-        # Annotate the values on the bars
-        def annotate_bars(bars, ax):
-            for bar in bars:
-                height = bar.get_height()
-                ax.annotate(f'{height:.2f}', 
-                            xy=(bar.get_x() + bar.get_width() / 2, height),
-                            xytext=(0, 3),  # 3 points vertical offset
-                            textcoords="offset points",
-                            ha='center', va='bottom')
-
-        annotate_bars(bars_lasso, axes[0])
-        annotate_bars(bars_ridge, axes[1])
-        annotate_bars(bars_ridge, axes[2])
 
         plt.tight_layout()
         plt.show()
